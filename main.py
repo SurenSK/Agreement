@@ -5,10 +5,15 @@ from openai import OpenAI
 from typing import Literal
 from time import sleep
 import json
+import time
 load_dotenv()
 client = OpenAI()
 
 outputFile = "llm_data_1.json"
+
+def logLine(l):
+    with open("log.txt", "a") as log_file:
+        log_file.write(str(l) + "\n")
 
 score = {
         'Not at all likely': 2,
@@ -33,10 +38,10 @@ def getRating(q):
     )
     message = completion.choices[0].message
     if message.parsed:
-        print(message.parsed.rating)
+        logLine("\t"+message.parsed.rating)
         return score[message.parsed.rating]
     else:
-        print(message.refusal)
+        logLine("\t"+message.refusal)
         return 1
 
 def roll(lst, n):
@@ -64,7 +69,8 @@ with open('participants_data.json', 'r') as file:
     participants = [SimpleNamespace(**participant) for participant in participants]
 
 first_entry = True
-for participant in participants:
+for i,participant in enumerate(participants):
+    t0 = time.time()
     participant.dedup_ordered_answers_1_ai = []
     participant.dedup_ordered_answers_2_ai = []
     
@@ -94,6 +100,8 @@ for participant in participants:
         'dedup_ordered_answers_1_ai': participant.dedup_ordered_answers_1_ai,
         'dedup_ordered_answers_2_ai': participant.dedup_ordered_answers_2_ai
     }
+
+    logLine(f"+{time.time()-t0:.2f}s - Processed User#{i}/52")
 
     with open(outputFile, 'a') as outfile:
         if not first_entry:
