@@ -7,6 +7,8 @@ from time import sleep
 import json
 from scipy.stats import pearsonr
 import time
+import random
+
 load_dotenv()
 client = OpenAI()
 
@@ -97,8 +99,8 @@ for i,participant in enumerate(participants):
     output_data = {
         'userID': participant.userID,
         'roll': participant.roll,
-        'chisq_1': pearsonr(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_1_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_1]),
-        'chisq_2': pearsonr(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_2_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_2]),
+        'chisq_1': pearsonr([sum(x[1:])/3 for x in participant.dedup_ordered_answers_1_ai], [x[1] for x in participant.dedup_ordered_answers_1]),
+        'chisq_2': pearsonr([sum(x[1:])/3 for x in participant.dedup_ordered_answers_2_ai], [x[1] for x in participant.dedup_ordered_answers_2]),
         'dedup_ordered_answers_1': participant.dedup_ordered_answers_1,
         'dedup_ordered_answers_2': participant.dedup_ordered_answers_2,
         'dedup_ordered_answers_1_ai': participant.dedup_ordered_answers_1_ai,
