@@ -5,6 +5,7 @@ from openai import OpenAI
 from typing import Literal
 from time import sleep
 import json
+from scipy.stats import chisquare
 import time
 load_dotenv()
 client = OpenAI()
@@ -27,7 +28,7 @@ class Likert(BaseModel):
     rating: Literal['Not at all likely', 'Slightly likely', 'Somewhat likely', 'Moderately likely', 'Very likely', "Extremely likely"]
 
 def getRating(q):
-    sleep(1)
+    sleep(0.02)
     logLine("\t"+q)
     completion = client.beta.chat.completions.parse(
         model="gpt-4o-2024-08-06",
@@ -80,8 +81,8 @@ for i,participant in enumerate(participants):
         qText = questions[q[0]]
         prompt = "\n".join([base, qText, p1r_question])
         qRatings.append(getRating(prompt))
-        # qRatings.append(getRating(prompt))
-        # qRatings.append(getRating(prompt))
+        qRatings.append(getRating(prompt))
+        qRatings.append(getRating(prompt))
         participant.dedup_ordered_answers_1_ai.append(qRatings)
     
     for q in participant.dedup_ordered_answers_2:
@@ -89,13 +90,15 @@ for i,participant in enumerate(participants):
         qText = getQuestionSetText(q[0], 5 + participant.roll)
         prompt = "\n".join([base, qText, p2r_question])
         qRatings.append(getRating(prompt))
-        # qRatings.append(getRating(prompt))
-        # qRatings.append(getRating(prompt))
+        qRatings.append(getRating(prompt))
+        qRatings.append(getRating(prompt))
         participant.dedup_ordered_answers_2_ai.append(qRatings)
     
     output_data = {
         'userID': participant.userID,
         'roll': participant.roll,
+        'chisq_1': chisquare(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_1_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_1]),
+        'chisq_2': chisquare(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_2_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_2]),
         'dedup_ordered_answers_1': participant.dedup_ordered_answers_1,
         'dedup_ordered_answers_2': participant.dedup_ordered_answers_2,
         'dedup_ordered_answers_1_ai': participant.dedup_ordered_answers_1_ai,
@@ -103,7 +106,7 @@ for i,participant in enumerate(participants):
     }
 
     logLine(f"+{time.time()-t0:.2f}s - Processed User#{i}/52")
-
+    pass
     with open(outputFile, 'a') as outfile:
         if not first_entry:
             outfile.write(',\n')  # Separate participants with a comma
