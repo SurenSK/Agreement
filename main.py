@@ -5,7 +5,7 @@ from openai import OpenAI
 from typing import Literal
 from time import sleep
 import json
-from scipy.stats import chisquare
+from scipy.stats import pearsonr
 import time
 load_dotenv()
 client = OpenAI()
@@ -97,8 +97,8 @@ for i,participant in enumerate(participants):
     output_data = {
         'userID': participant.userID,
         'roll': participant.roll,
-        'chisq_1': chisquare(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_1_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_1]),
-        'chisq_2': chisquare(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_2_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_2]),
+        'chisq_1': pearsonr(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_1_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_1]),
+        'chisq_2': pearsonr(f_obs=[sum(x[1:])/3 for x in participant.dedup_ordered_answers_2_ai], f_exp=[x[1] for x in participant.dedup_ordered_answers_2]),
         'dedup_ordered_answers_1': participant.dedup_ordered_answers_1,
         'dedup_ordered_answers_2': participant.dedup_ordered_answers_2,
         'dedup_ordered_answers_1_ai': participant.dedup_ordered_answers_1_ai,
